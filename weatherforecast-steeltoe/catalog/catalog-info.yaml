@@ -6,7 +6,6 @@ metadata:
   tags:
     - app-accelerator
     - steeltoe
-    - vs-code
     - web
     - tanzu
     - ruben-dillon
