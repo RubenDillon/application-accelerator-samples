@@ -2,6 +2,14 @@ apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
   name: weatherforecast-steeltoe
+  description: Tanzu Steeltoe sample (from Ruben Dillon git !!! )
+  tags:
+    - app-accelerator
+    - steeltoe
+    - vs.code
+    - web
+    - tanzu
+    - ruben-dillon
   annotations:
     "backstage.io/kubernetes-label-selector": "app.kubernetes.io/part-of=weatherforecast-steeltoe"
 spec:
