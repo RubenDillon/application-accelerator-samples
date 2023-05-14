@@ -40,10 +40,16 @@ jobs:
         with:
           java-version: '17'
           distribution: 'adopt'
+      - name: Set up NodeJS 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
       - name: Wait for Engine Container
         uses: ifaxity/wait-on-action@v1
         with:
           resource: http://localhost:8888/actuator
           timeout: 10000
-      - name: ${{matrix.test}}
+      - name: Generate ${{matrix.test}}
+        run: .github/tests/generate.sh ${{matrix.test}}
+      - name: Test ${{matrix.test}}
         run: .github/tests/run-test.sh ${{matrix.test}}

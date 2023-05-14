@@ -87,23 +87,18 @@ accelerator:
           text: MySQL
       defaultValue: "postgres"
       required: true
-    - name: databaseName
-      inputType: text
-      defaultValue: "customer-database"
-      label: Database Instance Name
-      description: The name of the database instance this application will use
   imports:
   - name: java-version
     expose: []
   - name: spring-boot-postgresql
     expose:
-    - name: databasePostgresStorageClass
+    - name: databaseName
       dependsOn:
         name: databaseType
         value: postgres
   - name: spring-boot-mysql
     expose:
-    - name: databaseMySQLStorageClass
+    - name: databaseName
       dependsOn:
         name: databaseType
         value: mysql
@@ -208,8 +203,8 @@ engine:
 
     # Workload Resource name and database resource name
     - merge:
-      - exclude: [ "config/workload.yaml", "config/test-pipeline.yaml" ]
-      - include: [ "config/workload.yaml", "config/test-pipeline.yaml" ]
+      - exclude: [ "config/**" ]
+      - include: [ "config/workload.yaml" ]
         chain:
           - type: ReplaceText
             substitutions:
@@ -218,18 +213,6 @@ engine:
               - text: "customer-database"
                 with: "#databaseResourceName"
     # End Workload Resource name
-
-    # Test pipeline
-    - merge:
-      - exclude: [ "config/testcontainers-test-pipeline.yaml", "config/test-pipeline.yaml" ]
-      - include: [ "config/test-pipeline.yaml" ]
-        condition: "#databaseIntegrationTestType != 'testcontainers'"
-      - include: [ "config/testcontainers-test-pipeline.yaml" ]
-        condition: "#databaseIntegrationTestType == 'testcontainers'"
-        chain:
-          - type: RewritePath
-            rewriteTo: "'config/test-pipeline.yaml'"
-    # End Test pipleine
 
     - merge:
       - type: InvokeFragment
@@ -307,7 +290,7 @@ engine:
             newGroupId: "'org.springframework.boot'"
             oldArtifactId: "'spring-boot-starter-parent'"
             newArtifactId: "'spring-boot-starter-parent'"
-            newVersion: "'3.0.4'"
+            newVersion: "'3.0.5'"
         - type: OpenRewriteRecipe
           recipe: org.openrewrite.maven.ChangePropertyValue
           options:
@@ -317,6 +300,10 @@ engine:
           regex:
             pattern: "springdoc-openapi-webmvc-core"
             with: "'springdoc-openapi-starter-webmvc-api'"
+        - type: ReplaceText
+          regex:
+            pattern: "\\s+<snakeyaml.version>1.33</snakeyaml.version>"
+            with: "''"
       # Gradle Kotlin DSL
       - include: [ "build.gradle.kts" ]
         chain:
@@ -336,6 +323,10 @@ engine:
           regex:
             pattern: "springdoc-openapi-webmvc-core"
             with: "'springdoc-openapi-starter-webmvc-api'"
+        - type: ReplaceText
+          regex:
+            pattern: "\\s*extra\\[\"snakeyaml.version\"\\] = \"1.33\""
+            with: "''"
       # javax to jakarta imports
       - include: [ "**/*.java" ]
         chain:
@@ -373,8 +364,16 @@ engine:
               with: "'MySQL'"
           - type: ReplaceText
             regex:
+              pattern: "postgresql"
+              with: "'mysql'"
+          - type: ReplaceText
+            regex:
               pattern: "postgres"
               with: "'mysql'"
+          - type: ReplaceText
+            substitutions:
+              - text: "customer-database"
+                with: "#databaseResourceName"
           - type: ReplaceText
             condition: "#databaseIntegrationTestType == 'in-memory'"
             regex:
@@ -396,6 +395,10 @@ engine:
       - condition: "#databaseType == 'postgres'"
         include: [ "DATABASE.md" ]
         chain:
+          - type: ReplaceText
+            substitutions:
+              - text: "customer-database"
+                with: "#databaseResourceName"
           - type: ReplaceText
             condition: "#databaseIntegrationTestType == 'in-memory'"
             regex:

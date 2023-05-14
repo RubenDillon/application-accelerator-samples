@@ -4,6 +4,7 @@ metadata:
   name: java-function
   labels:
     apps.tanzu.vmware.com/workload-type: web
+    apps.tanzu.vmware.com/has-tests: "true"
     app.kubernetes.io/part-of: java-function
 spec:
   source:
@@ -15,3 +16,5 @@ spec:
     env:
       - name: BP_FUNCTION
         value: functions.Handler
+      - name: BP_JVM_VERSION
+        value: "17"
